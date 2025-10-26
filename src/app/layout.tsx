@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ToastContainer } from "@/components/Toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="font-sans antialiased">{children}</body>
+        <body className="font-sans antialiased">
+          {children}
+          <ToastContainer />
+        </body>
       </html>
     </ClerkProvider>
   );
