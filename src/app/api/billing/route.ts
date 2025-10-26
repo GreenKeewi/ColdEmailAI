@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-export async function POST() {
+export async function GET() {
   try {
     const { userId } = auth();
     
@@ -12,7 +12,7 @@ export async function POST() {
 
     const { data: user } = await supabaseAdmin
       .from('users')
-      .select('id')
+      .select('plan, subscription_status, subscription_id')
       .eq('clerk_id', userId)
       .single();
 
@@ -20,18 +20,19 @@ export async function POST() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Clear Gmail tokens
-    await supabaseAdmin
-      .from('settings')
-      .update({
-        gmail_refresh_token: null,
-        gmail_email: null,
-      })
-      .eq('user_id', user.id);
+    // Calculate next billing date (assuming monthly billing)
+    const nextBillingDate = new Date();
+    nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+    nextBillingDate.setDate(1);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      plan: user.plan,
+      status: user.subscription_status || 'active',
+      nextBillingDate: user.plan === 'pro' ? nextBillingDate.toISOString() : null,
+      cancelAtPeriodEnd: false,
+    });
   } catch (error) {
-    console.error('Error disconnecting Gmail:', error);
+    console.error('Error fetching billing info:', error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
