@@ -1,23 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const { userId } = auth();
+    const user = await getCurrentUser();
     
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { data: user } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('clerk_id', userId)
-      .single();
-
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get settings
@@ -47,20 +37,10 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { userId } = auth();
+    const user = await getCurrentUser();
     
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { data: user } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('clerk_id', userId)
-      .single();
-
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();

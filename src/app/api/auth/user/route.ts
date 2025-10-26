@@ -1,35 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const { userId } = auth();
+    const user = await getCurrentUser();
     
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get or create user in our database
-    let { data: user } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('clerk_id', userId)
-      .single();
-
     if (!user) {
-      // Create user if doesn't exist
-      const { data: newUser } = await supabaseAdmin
-        .from('users')
-        .insert({
-          clerk_id: userId,
-          email: '', // Will be updated from Clerk webhook
-          plan: 'free',
-        })
-        .select()
-        .single();
-      
-      user = newUser;
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     return NextResponse.json(user);
