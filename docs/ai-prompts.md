@@ -230,3 +230,24 @@ const response = await openai.chat.completions.create({
   max_tokens: 400,
 });
 ```
+
+## Using GitHub Models (development)
+
+You can route AI calls to a GitHub-hosted models endpoint for development or internal testing.
+
+1. Set the provider in your `.env.local`:
+
+```env
+AI_PROVIDER=github
+GITHUB_MODELS_KEY=ghm_XXXXXXXXXXXXXXXXXXXX
+GITHUB_MODELS_API_URL=https://api.github.com/copilot/experimental/generate
+GITHUB_MODEL_NAME=default
+```
+
+2. The app will send prompts as a JSON POST to `GITHUB_MODELS_API_URL` with an Authorization header `Bearer <GITHUB_MODELS_KEY>`.
+
+3. Response shapes vary by provider. The code attempts to extract a textual output from common response fields (e.g. `output_text`, `choices[0].text`, `output[0].content[0].text`). If your GitHub models endpoint uses a different schema, update `src/lib/ai.ts`'s `githubGenerate` helper to match the exact shape.
+
+Notes:
+- This is intended for development and preview stages. Production deployments should use a supported provider (OpenAI or Anthropic) or a vetted internal model gateway.
+- Make sure the GitHub models key is stored in environment variables and never committed to source control.

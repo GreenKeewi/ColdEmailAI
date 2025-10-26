@@ -1,7 +1,69 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 
-const AI_PROVIDER = process.env.AI_PROVIDER || 'openai';
+const AI_PROVIDER = (process.env.AI_PROVIDER || 'openai').toLowerCase();
+
+// GitHub Models (development) support
+// Set `AI_PROVIDER=github` and provide `GITHUB_MODELS_KEY` and optionally
+// `GITHUB_MODELS_API_URL` to point to the GitHub-hosted models endpoint you're using.
+// The implementation below uses a generic POST to the configured API URL and
+// attempts to extract a text output. Adjust `GITHUB_MODELS_API_URL` to match the
+// provider endpoint (GitHub's format may change; consult GitHub docs).
+async function githubGenerate(
+  prompt: string,
+  opts: { model?: string; max_tokens?: number; temperature?: number } = {}
+): Promise<string> {
+  const apiKey = process.env.GITHUB_MODELS_KEY;
+  const apiUrl = process.env.GITHUB_MODELS_API_URL || 'https://api.github.com/copilot/experimental/generate';
+
+  if (!apiKey) {
+    throw new Error('GITHUB_MODELS_KEY is not set');
+  }
+
+  const body = {
+    input: prompt,
+    model: opts.model || 'default',
+    max_tokens: opts.max_tokens || 300,
+    temperature: opts.temperature ?? 0.7,
+  };
+
+  // Use global fetch (Node 18+). The exact request/response shape depends on
+  // the GitHub models API you have access to — adjust parsing accordingly.
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GitHub models request failed: ${res.status} ${text}`);
+  }
+
+  const data = await res.json().catch(async () => ({ raw: await res.text() }));
+
+  // Heuristics to find text output in response
+  const candidates = [
+    (data as any).output_text,
+    (data as any).text,
+    (data as any).result,
+    (data as any).output?.[0]?.content?.[0]?.text,
+    (data as any).choices?.[0]?.text,
+    (data as any).choices?.[0]?.message?.content,
+    (data as any).raw,
+  ];
+
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c;
+  }
+
+  // Fallback to JSON string
+  return JSON.stringify(data);
+}
 
 // Initialize clients
 const openai = new OpenAI({
@@ -155,6 +217,18 @@ export async function generateSubjectLines(
       }
     }
     return [];
+  } else if (AI_PROVIDER === 'github') {
+    const text = await githubGenerate(prompt, {
+      model: process.env.GITHUB_MODEL_NAME,
+      max_tokens: 100,
+      temperature: 0.7,
+    });
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text.split('\n').filter(Boolean).slice(0, 3);
+    }
   } else {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -188,6 +262,14 @@ export async function generateEmailBody(
 
     const content = response.content[0];
     return content.type === 'text' ? content.text : '';
+  } else if (AI_PROVIDER === 'github') {
+    const text = await githubGenerate(prompt, {
+      model: process.env.GITHUB_MODEL_NAME,
+      max_tokens: 400,
+      temperature: 0.8,
+    });
+
+    return text;
   } else {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -234,6 +316,14 @@ export async function generateFollowUp(
 
     const content = response.content[0];
     return content.type === 'text' ? content.text : '';
+  } else if (AI_PROVIDER === 'github') {
+    const text = await githubGenerate(prompt, {
+      model: process.env.GITHUB_MODEL_NAME,
+      max_tokens: maxTokens,
+      temperature: 0.7,
+    });
+
+    return text;
   } else {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
