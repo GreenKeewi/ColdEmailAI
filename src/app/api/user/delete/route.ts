@@ -1,9 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { getUserUsage } from "@/lib/usage";
 
-export async function GET() {
+export async function DELETE() {
   try {
     const { userId } = auth();
     
@@ -14,7 +13,7 @@ export async function GET() {
     // Get user from database
     const { data: user } = await supabaseAdmin
       .from('users')
-      .select('id, plan')
+      .select('id')
       .eq('clerk_id', userId)
       .single();
 
@@ -22,14 +21,21 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const usage = await getUserUsage(user.id);
+    // Delete user (cascade will delete all related data)
+    await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', user.id);
 
-    return NextResponse.json({
-      plan: user.plan,
-      ...usage,
+    // Note: In production, you should also delete the user from Clerk
+    // This would require a server-side Clerk API call with your secret key
+    
+    return NextResponse.json({ 
+      success: true,
+      message: 'Account deleted successfully'
     });
   } catch (error) {
-    console.error('Error fetching usage:', error);
+    console.error('Error deleting account:', error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

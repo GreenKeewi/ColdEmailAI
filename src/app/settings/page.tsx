@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { showToast } from '@/components/Toast';
 
 interface Settings {
   gmailConnected: boolean;
@@ -26,10 +27,12 @@ export default function SettingsPage() {
   async function fetchSettings() {
     try {
       const res = await fetch('/api/settings');
+      if (!res.ok) throw new Error('Failed to fetch settings');
       const data = await res.json();
       setSettings(data);
     } catch (error) {
       console.error('Error fetching settings:', error);
+      showToast('Failed to load settings', 'error');
     } finally {
       setLoading(false);
     }
@@ -43,10 +46,13 @@ export default function SettingsPage() {
     if (!confirm('Are you sure you want to disconnect Gmail?')) return;
     
     try {
-      await fetch('/api/auth/gmail/disconnect', { method: 'POST' });
+      const res = await fetch('/api/auth/gmail/disconnect', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to disconnect');
+      showToast('Gmail disconnected successfully', 'success');
       fetchSettings();
     } catch (error) {
       console.error('Error disconnecting Gmail:', error);
+      showToast('Failed to disconnect Gmail', 'error');
     }
   }
 
@@ -55,17 +61,45 @@ export default function SettingsPage() {
     
     setSaving(true);
     try {
-      await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-      alert('Settings saved successfully!');
+
+      if (!res.ok) throw new Error('Failed to save settings');
+      
+      showToast('Settings saved successfully!', 'success');
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Failed to save settings');
+      showToast('Failed to save settings', 'error');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    const confirmation = prompt('This action cannot be undone. Type "DELETE" to confirm:');
+    
+    if (confirmation !== 'DELETE') {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/delete', {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Failed to delete account');
+
+      showToast('Account deleted successfully', 'success');
+      // Redirect to home page after deletion
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      showToast('Failed to delete account', 'error');
     }
   }
 
@@ -101,7 +135,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+          <div className="bg-white rounded-lg shadow p-12 text-center text-gray-700">
             Loading settings...
           </div>
         ) : (
@@ -110,7 +144,7 @@ export default function SettingsPage() {
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold">Email Connections</h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-900 mt-1">
                   Connect your email account to send from your address
                 </p>
               </div>
@@ -128,7 +162,7 @@ export default function SettingsPage() {
                           Connected: {settings.gmailEmail}
                         </p>
                       ) : (
-                        <p className="text-sm text-gray-500">Not connected</p>
+                        <p className="text-sm text-gray-700">Not connected</p>
                       )}
                     </div>
                   </div>
@@ -157,7 +191,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">SendGrid (Fallback)</h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-700">
                         Configured via environment variables
                       </p>
                     </div>
@@ -248,7 +282,10 @@ export default function SettingsPage() {
                       Permanently delete your account and all data
                     </p>
                   </div>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
                     Delete Account
                   </button>
                 </div>

@@ -4,10 +4,12 @@ import { UserButton } from "@clerk/nextjs";
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { showToast } from '@/components/Toast';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState({
     tone: 'professional',
     dailyLimit: 50,
@@ -23,15 +25,27 @@ export default function OnboardingPage() {
   }
 
   async function handleSavePreferences() {
+    setSaving(true);
     try {
-      await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
+        body: JSON.stringify({
+          defaultTone: preferences.tone,
+          dailySendLimit: preferences.dailyLimit,
+          followUpCadence: preferences.followUpCadence,
+        }),
       });
+
+      if (!res.ok) throw new Error('Failed to save preferences');
+      
+      showToast('Setup complete! Welcome to ColdEmail.AI!', 'success');
       router.push('/dashboard');
     } catch (error) {
       console.error('Error saving preferences:', error);
+      showToast('Failed to save preferences', 'error');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -53,7 +67,7 @@ export default function OnboardingPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-12">
-          <div className={`flex items-center ${step >= 1 ? 'text-primary-600' : 'text-gray-400'}`}>
+          <div className={`flex items-center ${step >= 1 ? 'text-primary-600' : 'text-gray-600'}`}>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
               step >= 1 ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-300'
             }`}>
@@ -62,7 +76,7 @@ export default function OnboardingPage() {
             <span className="ml-3 font-medium hidden sm:inline">Connect Email</span>
           </div>
           <div className={`w-24 h-1 mx-4 ${step >= 2 ? 'bg-primary-600' : 'bg-gray-300'}`}></div>
-          <div className={`flex items-center ${step >= 2 ? 'text-primary-600' : 'text-gray-400'}`}>
+          <div className={`flex items-center ${step >= 2 ? 'text-primary-600' : 'text-gray-600'}`}>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
               step >= 2 ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-300'
             }`}>
@@ -76,7 +90,7 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h1 className="text-3xl font-bold mb-4">Welcome to ColdEmail.AI! 👋</h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-900 mb-8">
               Let's get you set up. First, connect your email account to start sending personalized
               cold emails. We support Gmail via OAuth for maximum deliverability.
             </p>
@@ -99,16 +113,16 @@ export default function OnboardingPage() {
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold">Connect Gmail</div>
-                  <div className="text-sm text-gray-600">Recommended for best deliverability</div>
+                  <div className="text-sm text-gray-900">Recommended for best deliverability</div>
                 </div>
                 <span className="text-primary-600">→</span>
               </button>
 
-              <div className="text-center text-gray-500 text-sm">or</div>
+              <div className="text-center text-gray-700 text-sm">or</div>
 
               <button
                 onClick={handleSkipGmail}
-                className="w-full text-gray-600 hover:text-gray-900 py-2"
+                className="w-full text-gray-900 hover:text-gray-900 py-2"
               >
                 Skip for now (use SendGrid fallback)
               </button>
@@ -120,7 +134,7 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h1 className="text-3xl font-bold mb-4">Set Your Preferences</h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-900 mb-8">
               Customize your campaign settings. You can always change these later in Settings.
             </p>
 
@@ -139,7 +153,7 @@ export default function OnboardingPage() {
                   <option value="friendly">Friendly</option>
                   <option value="formal">Formal</option>
                 </select>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-700 mt-1">
                   The AI will use this tone when generating emails
                 </p>
               </div>
@@ -156,7 +170,7 @@ export default function OnboardingPage() {
                   min="1"
                   max="500"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-700 mt-1">
                   Maximum emails to send per day (prevents rate limiting)
                 </p>
               </div>
@@ -173,7 +187,7 @@ export default function OnboardingPage() {
                   min="1"
                   max="14"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-700 mt-1">
                   Days between follow-up emails in a sequence
                 </p>
               </div>
@@ -188,9 +202,10 @@ export default function OnboardingPage() {
               </button>
               <button
                 onClick={handleSavePreferences}
-                className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-semibold"
+                disabled={saving}
+                className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-semibold disabled:opacity-50"
               >
-                Complete Setup →
+                {saving ? 'Saving...' : 'Complete Setup →'}
               </button>
             </div>
           </div>

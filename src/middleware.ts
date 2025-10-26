@@ -12,7 +12,7 @@ let middlewareHandler: any;
 
 if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   // Simple passthrough middleware when Clerk is not configured.
-  middlewareHandler = (request: Request) => {
+  middlewareHandler = (_request: Request) => {
     return NextResponse.next();
   };
 } else {
@@ -31,8 +31,8 @@ if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
     "/terms",
   ]);
 
-  middlewareHandler = clerkMiddleware((auth: any, request: Request) => {
-    if (!isPublicRoute(request)) {
+  middlewareHandler = clerkMiddleware((auth: any, _request: Request) => {
+    if (!isPublicRoute(_request)) {
       auth().protect();
     }
   });

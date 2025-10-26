@@ -16,7 +16,7 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <Link
                 href="/sign-in"
-                className="text-gray-600 hover:text-gray-900 px-4 py-2"
+                className="text-gray-900 hover:text-gray-900 px-4 py-2"
               >
                 Sign In
               </Link>
@@ -44,7 +44,7 @@ export default function HomePage() {
             <br />
             <span className="text-primary-600">Outreach Made Simple</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-900 mb-8 max-w-3xl mx-auto">
             Write, schedule, send, and track personalized cold emails with AI.
             Emails are sent from your account — we don't send without your explicit approval.
           </p>
@@ -75,8 +75,8 @@ export default function HomePage() {
             <div className="aspect-video bg-gradient-to-br from-primary-100 to-blue-100 rounded-lg flex items-center justify-center">
               <div className="text-center">
                 <div className="text-4xl mb-4">📧</div>
-                <p className="text-gray-600 font-medium">Dashboard Preview</p>
-                <p className="text-sm text-gray-500 mt-2">Campaign analytics, lead tracking, and more</p>
+                <p className="text-gray-900 font-medium">Dashboard Preview</p>
+                <p className="text-sm text-gray-700 mt-2">Campaign analytics, lead tracking, and more</p>
               </div>
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function HomePage() {
             >
               <div className="text-4xl mb-4">🤖</div>
               <h3 className="text-xl font-semibold mb-2">AI-Generated Content</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Generate personalized subject lines, email bodies, and follow-up sequences
                 with GPT-4 or Claude. Every email is unique and tailored.
               </p>
@@ -112,7 +112,7 @@ export default function HomePage() {
             >
               <div className="text-4xl mb-4">📊</div>
               <h3 className="text-xl font-semibold mb-2">Track Everything</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Monitor opens, clicks, and replies in real-time. See exactly which leads
                 are engaging and follow up at the perfect moment.
               </p>
@@ -126,7 +126,7 @@ export default function HomePage() {
             >
               <div className="text-4xl mb-4">✉️</div>
               <h3 className="text-xl font-semibold mb-2">Your Email, Your Control</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-900">
                 Connect your Gmail account to send from your address, or use our SendGrid
                 integration. You approve every campaign before it goes out.
               </p>
@@ -151,7 +151,7 @@ export default function HomePage() {
             >
               <h3 className="text-2xl font-bold mb-2">Free</h3>
               <p className="text-4xl font-bold mb-4">
-                $0<span className="text-lg text-gray-500">/month</span>
+                $0<span className="text-lg text-gray-700">/month</span>
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center">

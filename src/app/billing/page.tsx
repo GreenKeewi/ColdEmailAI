@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { showToast } from '@/components/Toast';
 
 interface BillingInfo {
   plan: string;
@@ -23,6 +24,7 @@ export default function BillingPage() {
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [upgrading, setUpgrading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -34,6 +36,10 @@ export default function BillingPage() {
         fetch('/api/billing'),
         fetch('/api/usage'),
       ]);
+
+      if (!billingRes.ok || !usageRes.ok) {
+        throw new Error('Failed to fetch billing data');
+      }
       
       const billingData = await billingRes.json();
       const usageData = await usageRes.json();
@@ -42,8 +48,54 @@ export default function BillingPage() {
       setUsage(usageData);
     } catch (error) {
       console.error('Error fetching billing data:', error);
+      showToast('Failed to load billing information', 'error');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleUpgrade() {
+    setUpgrading(true);
+    try {
+      const res = await fetch('/api/billing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upgrade' }),
+      });
+
+      if (!res.ok) throw new Error('Failed to upgrade');
+
+      const data = await res.json();
+      showToast(data.message || 'Upgraded successfully!', 'success');
+      fetchData();
+    } catch (error) {
+      console.error('Error upgrading:', error);
+      showToast('Failed to upgrade subscription', 'error');
+    } finally {
+      setUpgrading(false);
+    }
+  }
+
+  async function handleCancel() {
+    if (!confirm('Are you sure you want to cancel your Pro subscription? You will lose access to Pro features at the end of your billing period.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/billing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel' }),
+      });
+
+      if (!res.ok) throw new Error('Failed to cancel');
+
+      const data = await res.json();
+      showToast(data.message || 'Subscription cancelled', 'success');
+      fetchData();
+    } catch (error) {
+      console.error('Error cancelling:', error);
+      showToast('Failed to cancel subscription', 'error');
     }
   }
 
@@ -122,8 +174,12 @@ export default function BillingPage() {
                       Get unlimited AI-generated emails, advanced analytics, and priority support
                       for just $12/month.
                     </p>
-                    <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-semibold">
-                      Upgrade to Pro
+                    <button 
+                      onClick={handleUpgrade}
+                      disabled={upgrading}
+                      className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-semibold disabled:opacity-50"
+                    >
+                      {upgrading ? 'Upgrading...' : 'Upgrade to Pro'}
                     </button>
                   </div>
                 ) : (
@@ -131,7 +187,10 @@ export default function BillingPage() {
                     <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                       Update Payment Method
                     </button>
-                    <button className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50">
+                    <button 
+                      onClick={handleCancel}
+                      className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50"
+                    >
                       Cancel Subscription
                     </button>
                   </div>
@@ -195,8 +254,12 @@ export default function BillingPage() {
                       You only have {usage?.remaining} emails remaining this month.
                       Upgrade to Pro for unlimited emails.
                     </p>
-                    <button className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-sm font-semibold">
-                      Upgrade Now
+                    <button 
+                      onClick={handleUpgrade}
+                      disabled={upgrading}
+                      className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-sm font-semibold disabled:opacity-50"
+                    >
+                      {upgrading ? 'Upgrading...' : 'Upgrade Now'}
                     </button>
                   </div>
                 )}
@@ -270,8 +333,12 @@ export default function BillingPage() {
                       </li>
                     </ul>
                     {billing?.plan !== 'pro' && (
-                      <button className="w-full mt-4 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-semibold">
-                        Upgrade to Pro
+                      <button 
+                        onClick={handleUpgrade}
+                        disabled={upgrading}
+                        className="w-full mt-4 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 font-semibold disabled:opacity-50"
+                      >
+                        {upgrading ? 'Upgrading...' : 'Upgrade to Pro'}
                       </button>
                     )}
                   </div>
