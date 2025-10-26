@@ -73,7 +73,7 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage your cold email campaigns</p>
+            <p className="text-gray-900 mt-1">Manage your cold email campaigns</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -113,10 +113,10 @@ export default function DashboardPage() {
             <h2 className="text-xl font-semibold">Recent Campaigns</h2>
           </div>
           {loading ? (
-            <div className="p-12 text-center text-gray-500">Loading campaigns...</div>
+            <div className="p-12 text-center text-gray-700">Loading campaigns...</div>
           ) : campaigns.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-500 mb-4">No campaigns yet</p>
+              <p className="text-gray-700 mb-4">No campaigns yet</p>
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="text-primary-600 hover:underline"
@@ -135,7 +135,7 @@ export default function DashboardPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-semibold text-lg mb-1">{campaign.name}</h3>
-                      <div className="flex gap-4 text-sm text-gray-600">
+                      <div className="flex gap-4 text-sm text-gray-900">
                         <span>{campaign.totalLeads} leads</span>
                         <span>•</span>
                         <span>{campaign.sentCount} sent</span>
@@ -184,7 +184,7 @@ function StatCard({ title, value, icon }: { title: string; value: number; icon: 
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600 mb-1">{title}</p>
+          <p className="text-sm text-gray-900 mb-1">{title}</p>
           <p className="text-3xl font-bold">{value}</p>
         </div>
         <div className="text-4xl">{icon}</div>

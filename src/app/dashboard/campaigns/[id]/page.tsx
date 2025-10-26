@@ -80,7 +80,7 @@ export default function CampaignDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading campaign...</div>
+        <div className="text-gray-700">Loading campaign...</div>
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function CampaignDetailPage() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{campaign.name}</h1>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-4 text-sm text-gray-900">
                   <span className={`px-3 py-1 rounded-full text-sm ${
                     campaign.status === 'active' ? 'bg-green-100 text-green-800' :
                     campaign.status === 'draft' ? 'bg-gray-100 text-gray-800' :
@@ -158,23 +158,23 @@ export default function CampaignDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold">{campaign.totalLeads}</div>
-                <div className="text-sm text-gray-600">Total Leads</div>
+                <div className="text-sm text-gray-900">Total Leads</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold">{campaign.sentCount}</div>
-                <div className="text-sm text-gray-600">Sent</div>
+                <div className="text-sm text-gray-900">Sent</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold">{campaign.openedCount}</div>
-                <div className="text-sm text-gray-600">Opened</div>
+                <div className="text-sm text-gray-900">Opened</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold">{campaign.clickedCount}</div>
-                <div className="text-sm text-gray-600">Clicked</div>
+                <div className="text-sm text-gray-900">Clicked</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-2xl font-bold">{campaign.repliedCount}</div>
-                <div className="text-sm text-gray-600">Replied</div>
+                <div className="text-sm text-gray-900">Replied</div>
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function CampaignDetailPage() {
             <h2 className="text-xl font-semibold">Leads</h2>
           </div>
           {leads.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-700">
               No leads in this campaign
             </div>
           ) : (
@@ -194,19 +194,19 @@ export default function CampaignDetailPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Lead
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Company
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -219,7 +219,7 @@ export default function CampaignDetailPage() {
                           <div className="font-medium text-gray-900">
                             {lead.firstName} {lead.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">{lead.email}</div>
+                          <div className="text-sm text-gray-700">{lead.email}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
@@ -263,7 +263,7 @@ export default function CampaignDetailPage() {
               <h2 className="text-2xl font-bold">Email Preview</h2>
               <button
                 onClick={() => setShowPreview(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-700 hover:text-gray-700"
               >
                 ✕
               </button>
@@ -293,7 +293,7 @@ export default function CampaignDetailPage() {
                   <h3 className="font-semibold mb-2">Follow-ups:</h3>
                   {preview.followUps?.map((followUp: any, i: number) => (
                     <div key={i} className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-600 mb-2">
+                      <h4 className="text-sm font-medium text-gray-900 mb-2">
                         Follow-up {followUp.sequence}
                       </h4>
                       <div className="p-4 bg-gray-50 rounded border border-gray-200 whitespace-pre-wrap">
@@ -316,7 +316,7 @@ export default function CampaignDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center text-gray-500">
+              <div className="p-12 text-center text-gray-700">
                 Generating preview...
               </div>
             )}

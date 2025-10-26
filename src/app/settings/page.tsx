@@ -101,7 +101,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+          <div className="bg-white rounded-lg shadow p-12 text-center text-gray-700">
             Loading settings...
           </div>
         ) : (
@@ -110,7 +110,7 @@ export default function SettingsPage() {
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b">
                 <h2 className="text-xl font-semibold">Email Connections</h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-900 mt-1">
                   Connect your email account to send from your address
                 </p>
               </div>
@@ -128,7 +128,7 @@ export default function SettingsPage() {
                           Connected: {settings.gmailEmail}
                         </p>
                       ) : (
-                        <p className="text-sm text-gray-500">Not connected</p>
+                        <p className="text-sm text-gray-700">Not connected</p>
                       )}
                     </div>
                   </div>
@@ -157,7 +157,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">SendGrid (Fallback)</h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-700">
                         Configured via environment variables
                       </p>
                     </div>
