@@ -41,6 +41,7 @@ export default function CampaignDetailPage() {
   const [preview, setPreview] = useState<any>(null);
   const [showAddLeadsModal, setShowAddLeadsModal] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
 
   const fetchCampaign = useCallback(async () => {
     try {
@@ -136,6 +137,38 @@ export default function CampaignDetailPage() {
     } catch (error) {
       console.error('Error deleting campaign:', error);
       showToast('Failed to delete campaign', 'error');
+    }
+  }
+
+  async function handleSendTestEmail() {
+    if (!preview) return;
+
+    const testEmail = prompt('Enter email address to send test to:');
+    if (!testEmail) return;
+
+    setSendingTest(true);
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: preview.subjects[0],
+          emailBody: preview.body,
+          testEmail,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send test email');
+      }
+
+      showToast('Test email sent successfully!', 'success');
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      showToast(error instanceof Error ? error.message : 'Failed to send test email', 'error');
+    } finally {
+      setSendingTest(false);
     }
   }
 
@@ -402,8 +435,12 @@ export default function CampaignDetailPage() {
                   >
                     Close
                   </button>
-                  <button className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
-                    Send Test Email
+                  <button 
+                    onClick={handleSendTestEmail}
+                    disabled={sendingTest}
+                    className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    {sendingTest ? 'Sending...' : 'Send Test Email'}
                   </button>
                 </div>
               </div>
