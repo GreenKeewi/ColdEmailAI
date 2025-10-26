@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { showToast } from '@/components/Toast';
 
 interface BillingInfo {
   plan: string;
@@ -34,6 +35,10 @@ export default function BillingPage() {
         fetch('/api/billing'),
         fetch('/api/usage'),
       ]);
+
+      if (!billingRes.ok || !usageRes.ok) {
+        throw new Error('Failed to fetch billing data');
+      }
       
       const billingData = await billingRes.json();
       const usageData = await usageRes.json();
@@ -42,6 +47,7 @@ export default function BillingPage() {
       setUsage(usageData);
     } catch (error) {
       console.error('Error fetching billing data:', error);
+      showToast('Failed to load billing information', 'error');
     } finally {
       setLoading(false);
     }

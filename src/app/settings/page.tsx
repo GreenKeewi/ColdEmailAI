@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { showToast } from '@/components/Toast';
 
 interface Settings {
   gmailConnected: boolean;
@@ -26,10 +27,12 @@ export default function SettingsPage() {
   async function fetchSettings() {
     try {
       const res = await fetch('/api/settings');
+      if (!res.ok) throw new Error('Failed to fetch settings');
       const data = await res.json();
       setSettings(data);
     } catch (error) {
       console.error('Error fetching settings:', error);
+      showToast('Failed to load settings', 'error');
     } finally {
       setLoading(false);
     }
@@ -43,10 +46,13 @@ export default function SettingsPage() {
     if (!confirm('Are you sure you want to disconnect Gmail?')) return;
     
     try {
-      await fetch('/api/auth/gmail/disconnect', { method: 'POST' });
+      const res = await fetch('/api/auth/gmail/disconnect', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to disconnect');
+      showToast('Gmail disconnected successfully', 'success');
       fetchSettings();
     } catch (error) {
       console.error('Error disconnecting Gmail:', error);
+      showToast('Failed to disconnect Gmail', 'error');
     }
   }
 
@@ -55,15 +61,18 @@ export default function SettingsPage() {
     
     setSaving(true);
     try {
-      await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-      alert('Settings saved successfully!');
+
+      if (!res.ok) throw new Error('Failed to save settings');
+      
+      showToast('Settings saved successfully!', 'success');
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Failed to save settings');
+      showToast('Failed to save settings', 'error');
     } finally {
       setSaving(false);
     }

@@ -59,7 +59,7 @@ export async function getUserUsage(userId: string): Promise<{
   remaining: number;
   resetDate: string;
 }> {
-  const { usage, limit, plan } = await checkUsageQuota(userId);
+  const { usage, limit } = await checkUsageQuota(userId);
   const currentMonth = new Date().toISOString().slice(0, 7);
 
   // Get next month's first day

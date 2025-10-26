@@ -4,10 +4,12 @@ import { UserButton } from "@clerk/nextjs";
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { showToast } from '@/components/Toast';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState({
     tone: 'professional',
     dailyLimit: 50,
@@ -23,15 +25,27 @@ export default function OnboardingPage() {
   }
 
   async function handleSavePreferences() {
+    setSaving(true);
     try {
-      await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
+        body: JSON.stringify({
+          defaultTone: preferences.tone,
+          dailySendLimit: preferences.dailyLimit,
+          followUpCadence: preferences.followUpCadence,
+        }),
       });
+
+      if (!res.ok) throw new Error('Failed to save preferences');
+      
+      showToast('Setup complete! Welcome to ColdEmail.AI!', 'success');
       router.push('/dashboard');
     } catch (error) {
       console.error('Error saving preferences:', error);
+      showToast('Failed to save preferences', 'error');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -188,9 +202,10 @@ export default function OnboardingPage() {
               </button>
               <button
                 onClick={handleSavePreferences}
-                className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-semibold"
+                disabled={saving}
+                className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-semibold disabled:opacity-50"
               >
-                Complete Setup →
+                {saving ? 'Saving...' : 'Complete Setup →'}
               </button>
             </div>
           </div>
