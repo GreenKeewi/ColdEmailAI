@@ -78,6 +78,31 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    const confirmation = prompt('This action cannot be undone. Type "DELETE" to confirm:');
+    
+    if (confirmation !== 'DELETE') {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/delete', {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Failed to delete account');
+
+      showToast('Account deleted successfully', 'success');
+      // Redirect to home page after deletion
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      showToast('Failed to delete account', 'error');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -257,7 +282,10 @@ export default function SettingsPage() {
                       Permanently delete your account and all data
                     </p>
                   </div>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
                     Delete Account
                   </button>
                 </div>
