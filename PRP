@@ -1,0 +1,166 @@
+PRP Prompt for the AI Agent
+
+Goal: Build a full-stack, publishable web app called ColdEmail.AI — an AI-powered outreach platform that writes, schedules, sends, and tracks personalized cold emails. The app must be production-ready and deployable to Vercel. Use Clerk for authentication and subscription billing. Use Supabase for database, storage, and realtime logs. Implement Free and Pro monthly plans only (Free limited to 25 AI-generated emails/month; Pro = $12/month unlimited up to fair-use). No lifetime plans.
+
+Important stack rules (must follow exactly):
+
+Authentication & Billing: Clerk only. Use Clerk for sign-up, sign-in, user management, and subscription billing.
+
+Database & Storage: Supabase only. Use Postgres schema in Supabase for all persisted data (users, leads, campaigns, logs) and Supabase Storage for CSVs and attachments.
+
+Frontend: Next.js (latest), React, Tailwind CSS, Framer Motion for micro-interactions.
+
+Backend: Next.js API routes (serverless) + small Node worker (for queued background jobs) if necessary.
+
+AI Integration: OpenAI GPT or Anthropic Claude for generating subject lines, email bodies, follow-ups. Agent should support swapping providers via env var.
+
+Email Sending / Tracking: Primary: Gmail API via OAuth for each user account (so emails send from the user’s address). Secondary/fallback: SendGrid SMTP/API from an app-owned sending account (for users who prefer not to connect Gmail). Track opens/clicks via SendGrid webhook + pixel tracking when needed. Always respect user consent and Gmail/SendGrid quotas.
+
+Deployment: Vercel for frontend (and Next API), Supabase for DB/storage, Clerk-hosted keys for auth. Use environment variables for keys/secrets.
+
+Readme: Generate a full README with setup, env vars, deployment steps, and troubleshooting.
+
+Deliverables (create all files, no manual edits needed):
+
+Project skeleton + package.json with necessary scripts.
+
+Complete frontend pages/components:
+
+Landing page with hero, 3 benefit sections, pricing section, and CTAs ("Start for Free", "Upgrade to Pro").
+
+Signup / Login pages using Clerk components (SignIn / SignUp / UserButton).
+
+Onboarding flow: Connect Gmail (OAuth), upload or paste leads CSV, set campaign preferences (tone, follow-up cadence, daily send limit), and preview first campaign.
+
+Dashboard: Campaign list, campaign detail (leads, status, opens, replies), quick “Create Campaign” modal.
+
+Campaign builder: Upload CSV, map columns (name, company, email), choose tone & template, set schedule, test-send single email.
+
+Compose / Template editor: AI generate subject + body + follow-ups; let user edit before scheduling.
+
+Billing page (Clerk billing UI): show current plan, next billing date, cancel subscription button, upgrade CTA.
+
+Settings: Connected emails (Gmail tokens), API provider choice, export data, account deletion.
+
+404 & Error pages with friendly copy.
+
+Complete backend logic (Next API routes + worker):
+
+/api/auth/ hooks with Clerk verification for server requests.
+
+/api/campaigns: create/list/update/delete campaigns (protected).
+
+/api/campaigns/:id/preview: call AI to generate subject/body/follow-up drafts (return editable JSON).
+
+/api/campaigns/:id/schedule: schedule campaign; enqueue tasks for sending.
+
+/api/send: worker endpoint called by queued job to send single email (either Gmail / SendGrid).
+
+/api/webhooks/sendgrid: receive events (opens, clicks, bounces) and map back to lead & campaign.
+
+/api/billing: server-side verification of Clerk subscription status for feature gating.
+
+/api/usage: checks monthly quota for Free users (must block sends over limit).
+
+Supabase schema & helper files:
+
+Tables: users (clerk_id mapping), campaigns, leads, messages (per lead), events (open/click/reply), usage_logs, settings.
+
+Storage buckets: lead_uploads, assets.
+
+Provide SQL migration files to create schema.
+
+AI prompts & templates:
+
+Reusable, parametric prompt templates for subject generation, first message, and 3-stage follow-up sequence. Include examples and temperature settings; include guardrails for length, do-not-ask-for-sensitive-data, and professional tone variations.
+
+Gmail OAuth flow:
+
+Implement frontend flow to request Gmail scopes for sending + reading threads (for reply detection). Persist refresh tokens securely (Supabase encrypted column). Provide instructions for Google Cloud Console setup and redirect URLs.
+
+Fallback SendGrid flow:
+
+If user chooses not to connect Gmail, app sends via SendGrid and records the email as from a shared sender. Provide clear UX warnings about "from" address and deliverability.
+
+Tracking & reply detection:
+
+Use thread search (Gmail API) or webhook parsing to detect replies; use open tracking pixel and click tracking via SendGrid or a hosted tracking route for Gmail-sent emails where possible.
+
+Rate limiting & fair use:
+
+Implement per-user send rate limiting (daily & monthly). Free = 25 AI-generated emails / month; Pro = unlimited but fair use (warn and pause on abuse).
+
+Billing & gating:
+
+Integrate Clerk Billing: create Free and Pro ($12/mo). Implement server-side checks to block actions above Free tier. Ensure Clerk webhooks update user records.
+
+Tests & CI:
+
+Unit tests for API routes (Jest), simple E2E scripts for critical flows (signup, upload CSV, preview generation, schedule one send). Provide GitHub Actions workflow to run tests and build.
+
+Security & compliance:
+
+Encrypt and never log OAuth refresh tokens. Offer data deletion workflow. Add a clear consent screen before enabling auto-send. Rate-limit to avoid spam. Add Terms of Use and Privacy Policy templates.
+
+Deployment & infra:
+
+Vercel deployment configuration; environment variable list with example names (NEXT_PUBLIC_OPENAI_KEY, SUPABASE_URL, SUPABASE_KEY, CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, SENDGRID_API_KEY). Provide step-by-step Vercel and Supabase linking in README.
+
+README:
+
+Setup steps (local dev, env, Google OAuth, Clerk, Supabase migrations, testing, deploy), troubleshooting, and a short product-run checklist (first test campaign).
+
+UX details & copy guidance (use throughout):
+
+Tone: professional, helpful, a bit playful. Provide microcopy for CTAs:
+
+Landing hero CTA: “Start for free — send 25 AI emails / month”
+
+Secondary CTA: “See Pro ($12/month) — unlimited AI emails”
+
+Button on campaign builder: “Generate & Preview” (AI) and “Schedule Campaign” (final send).
+
+Landing hero should show animated mock of dashboard applying to leads (visual only).
+
+Onboarding should emphasize privacy & user ownership: “Emails are sent from your account — we don’t send without your explicit approval.”
+
+Testing instructions for AI agent while building:
+
+After scaffolding files, run npm install and npm run dev and fix build errors.
+
+Create a test Clerk dev project, test Supabase locally or with a dev project, and simulate Google OAuth with test credentials.
+
+Run the preview generation flow with sample CSV and sample OpenAI key; assert responses returned within expected JSON structure.
+
+Simulate a send (use SendGrid sandbox or Gmail test account) and verify an event webhook marks the lead as 'opened' or 'replied'.
+
+Quality & production checklist before finishing deliverable:
+
+All pages are responsive and accessible.
+
+All routes are protected (server checks Clerk session).
+
+Sensitive keys are not committed; env var placeholders are present.
+
+Supabase migrations included and tested.
+
+Billing gating enforced for Free plan.
+
+README fully documents dev & deploy steps.
+
+GitHub Actions runs unit tests and build successfully.
+
+One end-to-end test demonstrates a full flow from signup → upload → generate → test-send (no mass sending).
+
+Extra instructions (developer experience):
+
+Create a docs/ folder containing prompt examples, API docs, and the AI prompt templates used for generation.
+
+Provide seed/ data with a sample CSV and 3 demo leads.
+
+Provide a migrations/ folder with SQL to initialize the Supabase schema.
+
+Add a scripts/ helper to run local dev services (e.g., scripts/dev:all that runs Next and any worker).
+
+Final message:
+When you finish, produce a ZIP of the project (or push to a new GitHub repo) and create a single README with step-by-step deploy instructions for Vercel + Supabase + Clerk + Google OAuth setup. Also include a short “how to demo” script: create account, connect Gmail, upload sample CSV, generate a preview, test-send to a demo address, view analytics.
