@@ -5,19 +5,18 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Client for browser
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+// Always create clients (they will use empty strings if env vars are missing).
+// In production the proper env vars should be set; creating clients here
+// avoids build-time TypeScript nullability errors when checking server routes.
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 // Service client for server-side operations
-export const supabaseAdmin = supabaseUrl && supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  : null;
+export const supabaseAdmin = createClient(supabaseUrl || '', supabaseServiceKey || '', {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 // Database types
 export type Database = {

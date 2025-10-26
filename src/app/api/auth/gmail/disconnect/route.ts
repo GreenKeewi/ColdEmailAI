@@ -10,6 +10,11 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!supabaseAdmin) {
+      console.error('supabaseAdmin client is not configured');
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+    }
+
     const { data: user } = await supabaseAdmin
       .from('users')
       .select('id')
